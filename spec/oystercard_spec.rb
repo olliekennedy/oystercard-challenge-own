@@ -1,6 +1,7 @@
 require 'oystercard'
 RSpec.describe Oystercard do
-  let(:station) {double :station, :name => "KX"}
+  let(:station) { double :station, :name => "KX" }
+  let(:station2) { double :station2, :name => "Piccadilly Circus" }
   describe '#balance' do
     it 'checks the new card has a balance' do
       expect(subject.balance).to eq 0
@@ -47,17 +48,48 @@ RSpec.describe Oystercard do
   end
   describe '#touch_out' do
     it 'changes in_use to false when called' do
-      pending("let's fix that thing first")
+      #pending("let's fix that thing first")
       subject.top_up(50)
       subject.touch_in(station)
-      subject.touch_out
-      expect(subject.in_journey?).to eq nil
+      subject.touch_out(station)
+      expect(subject.in_journey?).to eq false
     end
     it 'reduces the balance by the minimum fare' do
       subject.top_up(10)
       subject.touch_in(station)
-      expect{ subject.touch_out }.to change{ subject.balance }.by(-Oystercard::MIN_FARE)
+      expect{ subject.touch_out(station) }.to change{ subject.balance }.by(-Oystercard::MIN_FARE)
     end
 
+  end
+  describe '.trip_log' do
+    let(:journey){ {entry: station.name, exit: station2.name} }
+
+    it 'stores a journey' do
+      subject.touch_in(station)
+      subject.touch_out(station2)
+      expect(subject.trip_log).to include journey
+    end
+    before(:each) do
+      subject.top_up(50)
+    end
+    it 'returns an empty journey list' do
+      expect(subject.trip_log).to be_empty
+    end
+    context 'many trips' do
+      before(:each) do
+        subject.touch_in(station)
+        subject.touch_out(station2)
+      end
+      it 'returns an array of one trip' do
+        expect(subject.trip_log).to include journey
+      end
+
+      it 'returns an array of a return trip' do
+        subject.touch_in(station2)
+        subject.touch_out(station)
+        expect(subject.trip_log).to eq [{ :entry=>"KX", :exit=>"Piccadilly Circus" },
+                                        { :entry=>"Piccadilly Circus", :exit=>"KX" }]
+      end
+    end
   end
 end
