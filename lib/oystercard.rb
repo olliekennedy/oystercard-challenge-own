@@ -1,13 +1,14 @@
 class Oystercard
 
-  attr_reader :balance, :entry_station, :trip_log
+  attr_reader :balance, :entry_station, :journey_log
   MIN_FARE = 1
   MAX_BALANCE = 90
+  PENALTY = 6
 
   def initialize
     @balance = 0
-    @entry_station = nil
-    @trip_log = []
+    @journey_log = []
+    @journey = nil
   end
 
   def top_up(amount)
@@ -15,27 +16,33 @@ class Oystercard
     @balance += amount
   end
 
-  def in_journey?
-    !!@entry_station
-  end
 
   def touch_in(station)
     raise("Insufficient funds!") if @balance < MIN_FARE
-    @entry_station = station.name
+    @journey = Journey.new(station)
   end
 
   def touch_out(station)
-    @balance -= MIN_FARE
-    log_trip(station)
-    @entry_station = nil
+    @balance -= fare
+    # fail if no touch in
+    @journey.exit = station
+    log_journey
+    @journey = nil
   end
 
-  # Thinking about creating a trip class - instantiate the trip as a hash
+  def fare
+    in_journey? ? MIN_FARE : PENALTY
+  end
+  # Thinking about creating a journey class - instantiate the journey as a hash
   # then can add the entry and exit stations as functions from touch in/out
 
   private
-  def log_trip(station)
-    @trip_log << { entry: @entry_station, exit: station.name }
+  def in_journey?
+    !!@journey
+  end
+
+  def log_journey
+    @journey_log << @journey.log
   end
 
   def deduct(amount)
