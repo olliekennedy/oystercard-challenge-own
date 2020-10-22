@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'oystercard'
 RSpec.describe Oystercard do
   let(:station) { double :station, name: :KX }

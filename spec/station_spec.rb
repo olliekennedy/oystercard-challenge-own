@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require './lib/station'
 
 RSpec.describe Station do

@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# This is the journey class
 class Journey
   attr_accessor :entry_station, :exit
 

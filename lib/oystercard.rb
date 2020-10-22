@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Class for Oystercard
 class Oystercard
   attr_reader :balance, :entry_station, :journey_log
 
